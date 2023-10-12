@@ -7,6 +7,7 @@ RUN apt-get update \
 	git \
 	gnupg \
 	golang \
+	nano \
 	software-properties-common \
 	sudo \
 	vim \
