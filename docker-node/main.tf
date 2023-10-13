@@ -30,18 +30,28 @@ resource "coder_agent" "main" {
   startup_script          = <<-EOT
     set -e
 
-    mkdir -p ~/workspace
+    # Generate an ssh key pair if one does not exist
+    KEY_PATH="$HOME/.ssh/id_ed25519"
+    if [[ ! -f "$KEY_PATH" ]]; then
+        echo "Generating SSH key pair..."
+        ssh-keygen -t ed25519 -a 100 -f "$KEY_PATH" -N ""
+        echo "SSH key pair generated successfully."
+        echo "Public key: $(cat $${KEY_PATH}.pub)"
+    fi
 
     # setup dotfiles, if we specified some
+    echo "Installing dotfiles..."
     [ -z "$${DOTFILES_URI}" ] || coder dotfiles -y "$${DOTFILES_URI}"
 
     # set default node
+    echo "Setting default node.js version..."
     export NVM_DIR="$HOME/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
     nvm use '${data.coder_parameter.node_version.value}'
 
     # install and start code-server
+    echo "Starting code-server..."
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.11.0
     /tmp/code-server/bin/code-server --auth none --port 13337 ~/workspace >/tmp/code-server.log 2>&1 &
   EOT
