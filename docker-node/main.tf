@@ -50,6 +50,12 @@ resource "coder_agent" "main" {
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
     nvm use '${data.coder_parameter.node_version.value}'
 
+    # start ssh agent - https://unix.stackexchange.com/a/132117
+    echo "Starting ssh agent..."
+    export SSH_AUTH_SOCK=~/.ssh/ssh-agent.$HOSTNAME.sock
+    ssh-agent -a "$SSH_AUTH_SOCK" >/dev/null
+    ssh-add
+
     # install and start code-server
     echo "Starting code-server..."
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.11.0
