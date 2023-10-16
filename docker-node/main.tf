@@ -25,6 +25,10 @@ data "coder_workspace" "me" {
 resource "coder_agent" "main" {
   arch                    = data.coder_provisioner.me.arch
   os                      = "linux"
+  shutdown_script         = <<-EOT
+    # remove ssh agent socket
+    rm "$SSH_AUTH_SOCK"
+  EOT
   startup_script_behavior = "blocking"
   startup_script_timeout  = 180
   startup_script          = <<-EOT
@@ -53,6 +57,8 @@ resource "coder_agent" "main" {
     # start ssh agent - https://unix.stackexchange.com/a/132117
     echo "Starting ssh agent..."
     export SSH_AUTH_SOCK=~/.ssh/ssh-agent.$HOSTNAME.sock
+    # remove old socket, if we didn't shutdown cleanly
+    rm "$SSH_AUTH_SOCK"
     ssh-agent -a "$SSH_AUTH_SOCK" >/dev/null
     ssh-add
 
