@@ -58,7 +58,7 @@ resource "coder_agent" "main" {
     echo "Starting ssh agent..."
     export SSH_AUTH_SOCK=~/.ssh/ssh-agent.$HOSTNAME.sock
     # remove old socket, if we didn't shutdown cleanly
-    rm "$SSH_AUTH_SOCK"
+    rm -f "$SSH_AUTH_SOCK"
     ssh-agent -a "$SSH_AUTH_SOCK" >/dev/null
     ssh-add
 
