@@ -1,5 +1,8 @@
 FROM ubuntu
 
+ARG TERRAGRUNT_VERSION=0.53.6
+ARG USER=coder
+
 # Install general packages
 RUN apt-get update \
 	&& apt-get install -y \
@@ -27,7 +30,14 @@ RUN wget -O- https://apt.releases.hashicorp.com/gpg | \
 	&& terraform -help \
 	&& rm -rf /var/lib/apt/lists/*
 
-ARG USER=coder
+# Install Terragrunt
+RUN wget https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/terragrunt_linux_amd64 \
+    && wget https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/SHA256SUMS \
+    && grep terragrunt_linux_amd64 SHA256SUMS | sha256sum -c \
+    && mv terragrunt_linux_amd64 /usr/local/bin/terragrunt \
+    && chmod +x /usr/local/bin/terragrunt \
+    && rm SHA256SUMS
+
 RUN useradd --groups sudo --no-create-home --shell /bin/bash ${USER} \
 	&& echo "${USER} ALL=(ALL) NOPASSWD:ALL" >/etc/sudoers.d/${USER} \
 	&& chmod 0440 /etc/sudoers.d/${USER}
