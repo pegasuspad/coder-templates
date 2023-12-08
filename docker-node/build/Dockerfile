@@ -38,6 +38,13 @@ RUN wget https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGR
     && chmod +x /usr/local/bin/terragrunt \
     && rm SHA256SUMS
 
+# Install Ansible
+RUN apt update \
+  && add-apt-repository --yes --update ppa:ansible/ansible \
+  && apt-get -y install \
+    ansible \
+	&& rm -rf /var/lib/apt/lists/*
+
 RUN useradd --groups sudo --no-create-home --shell /bin/bash ${USER} \
 	&& echo "${USER} ALL=(ALL) NOPASSWD:ALL" >/etc/sudoers.d/${USER} \
 	&& chmod 0440 /etc/sudoers.d/${USER}
